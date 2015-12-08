@@ -127,7 +127,7 @@ public void write(BufferedImage img, OutputStream os) throws Exception {
   write(getRGB(img), imageWidth, imageHeight, os);
 }
 
-private void encode(byte[] pixels, OutputStream os) throws Exception {
+private void encode(byte[] pixels, OutputStream os) throws IOException {
   // Define local variables
   int parent = 0;
   int son = 0;
@@ -217,12 +217,12 @@ private void encode(byte[] pixels, OutputStream os) throws Exception {
  * @param os OutputStream for the animated GIF
  * @throws Exception
  */
-public void finishWrite(OutputStream os) throws Exception {
+public void finishWrite(OutputStream os) throws IOException {
   os.write(IMAGE_TRAILER);
   os.close();
 }
 
-private void flush_buf(OutputStream os, int len) throws Exception {
+private void flush_buf(OutputStream os, int len) throws IOException {
   os.write(len);
   os.write(bytes_buf, 0, len);
   // Clear the bytes buffer
@@ -393,7 +393,7 @@ private void init_encoder(int bitsPerPixel) {
  * or equal zero, it will be determined from the first frame
  * @throws Exception
  */
-public void prepareForWrite(OutputStream os, int logicalScreenWidth, int logicalScreenHeight) throws Exception {
+public void prepareForWrite(OutputStream os, int logicalScreenWidth, int logicalScreenHeight) throws IOException {
   // Header first
   writeHeader(os, true);
   this.logicalScreenWidth = logicalScreenWidth;
@@ -403,7 +403,7 @@ public void prepareForWrite(OutputStream os, int logicalScreenWidth, int logical
 }
 
 // Translate codes into bytes
-private void send_code_to_buffer(int code, OutputStream os) throws Exception {
+private void send_code_to_buffer(int code, OutputStream os) throws IOException {
   int temp = codeLen;
   // Shift the code to the left of the last byte in bytes_buf
   bytes_buf[bufIndex] |= ((code & MASK[empty_bits]) << (8 - empty_bits));
@@ -449,7 +449,7 @@ private void write(int[] pixels, int imageWidth, int imageHeight, OutputStream o
  * @param os OutputStream for the animated GIF
  * @throws Exception
  */
-public void writeAnimatedGIF(BufferedImage[] images, int[] delays, OutputStream os) throws Exception {
+public void writeAnimatedGIF(BufferedImage[] images, int[] delays, OutputStream os) throws IOException {
   // Header first
   writeHeader(os, true);
 
@@ -521,7 +521,7 @@ public void writeAnimatedGIF(List<GIFFrame> frames, OutputStream os) throws Exce
   writeAnimatedGIF(frames.toArray(new GIFFrame[0]), os);
 }
 
-private void writeComment(OutputStream os, String comment) throws Exception {
+private void writeComment(OutputStream os, String comment) throws IOException {
   os.write(EXTENSION_INTRODUCER);
   os.write(COMMENT_EXTENSION_LABEL);
   byte[] commentBytes = comment.getBytes();
@@ -611,7 +611,7 @@ public void writeFrame(OutputStream os, BufferedImage frame, int delay) throws E
   writeFrame(getRGB(frame.getSubimage(0, 0, imageWidth, imageHeight)), imageWidth, imageHeight, 0, 0, delay, os);
 }
 
-private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition, int delay, int disposalMethod, int userInputFlag, OutputStream os) throws Exception {
+private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition, int delay, int disposalMethod, int userInputFlag, OutputStream os) throws IOException {
   // Reset empty_bits
   empty_bits = 0x08;
 
@@ -683,12 +683,12 @@ private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int image
   os.write(0x00);
 }
 
-private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition, int delay, OutputStream os) throws Exception {
+private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition, int delay, OutputStream os) throws IOException {
   writeFrame(pixels, imageWidth, imageHeight, imageLeftPosition, imageTopPosition, delay, GIFFrame.DISPOSAL_RESTORE_TO_BACKGROUND, GIFFrame.USER_INPUT_NONE, os);
 }
 
 // Unit of delay is supposed to be in millisecond
-private void writeGraphicControlBlock(OutputStream os, int delay, int transparent_color, int disposalMethod, int userInputFlag) throws Exception {
+private void writeGraphicControlBlock(OutputStream os, int delay, int transparent_color, int disposalMethod, int userInputFlag) throws IOException {
   // Scale delay
   delay = Math.round(delay / 10.0f);
 
@@ -721,7 +721,7 @@ private void writeHeader(OutputStream os, boolean newFormat) throws IOException 
   }
 }
 
-private void writeImageDescriptor(OutputStream os, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition, int colorTableSize) throws Exception {
+private void writeImageDescriptor(OutputStream os, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition, int colorTableSize) throws IOException {
   byte imageDescriptor[] = new byte[10];
   imageDescriptor[0] = IMAGE_SEPARATOR;// Image separator ","
   imageDescriptor[1] = (byte) (imageLeftPosition & 0xff);// Image left position
@@ -761,7 +761,7 @@ private void writeLSD(OutputStream os, short screen_width, short screen_height, 
   os.write(descriptor);
 }
 
-private void writeNetscapeApplicationBlock(OutputStream os, int loopCounts) throws Exception {
+private void writeNetscapeApplicationBlock(OutputStream os, int loopCounts) throws IOException {
   byte[] buf = new byte[19];
   buf[0] = EXTENSION_INTRODUCER; // Extension introducer
   buf[1] = APPLICATION_EXTENSION_LABEL; // Application extension label
@@ -786,16 +786,14 @@ private void writeNetscapeApplicationBlock(OutputStream os, int loopCounts) thro
   os.write(buf);
 }
 
-private void writePalette(OutputStream os, int num_of_color) throws Exception {
+private void writePalette(OutputStream os, int num_of_color) throws IOException {
   int index = 0;
   byte colors[] = new byte[num_of_color * 3];
-
   for (int i = 0; i < num_of_color; i++) {
     colors[index++] = (byte) (((colorPalette[i] >> 16) & 0xff));
     colors[index++] = (byte) (((colorPalette[i] >> 8) & 0xff));
     colors[index++] = (byte) (colorPalette[i] & 0xff);
   }
-
   os.write(colors, 0, num_of_color * 3);
 }
 
