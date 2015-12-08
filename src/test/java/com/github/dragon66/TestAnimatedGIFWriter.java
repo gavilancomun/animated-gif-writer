@@ -12,7 +12,7 @@ public class TestAnimatedGIFWriter {
 public static void main(String[] args) throws Exception {
   // args[0] directory for images
   // args[1] regex like .*\.(gif|GIF)$ will grab all GIF images
-  File[] files = listFilesMatching(new File(args[0]), args[1]);
+  File[] files = listFilesMatching(new File("src/test/resources/images"), "^tmp-.*gif$");
   AnimatedGIFWriter writer = new AnimatedGIFWriter(true);
   try (OutputStream os = new FileOutputStream("animated.gif")) {
     writer.prepareForWrite(os, -1, -1);
