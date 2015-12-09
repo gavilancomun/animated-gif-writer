@@ -17,6 +17,13 @@ writer.finishWrite(os);
 // And you are done!!!
 ```
 
+```
+AnimatedGIFWriter writer = new AnimatedGIFWriter(true);
+try (OutputStream os = new FileOutputStream(filename)) {
+  writer.writeAnimatedGIF(images, delays, os);
+}
+```
+
 If used as a normal GIF writer:
 
 ```java
